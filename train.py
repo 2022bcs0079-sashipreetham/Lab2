@@ -56,36 +56,49 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # --------------------------------------------------
-# EXP-03: Random Forest (50 Trees)
+# EXP-04: Random Forest (100 Trees + Feature Selection)
 # --------------------------------------------------
-rf_50 = RandomForestRegressor(n_estimators=50, random_state=42)
-rf_50.fit(X_train, y_train)
+rf_100 = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_100.fit(X_train, y_train)
 
-y_pred_rf50 = rf_50.predict(X_test)
-mse_rf50 = mean_squared_error(y_test, y_pred_rf50)
-r2_rf50 = r2_score(y_test, y_pred_rf50)
-
-print_experiment(
-    "EXP-03",
-    "Random Forest (50 Trees)",
-    "Random Forest Regressor",
-    "n_estimators=50",
-    "Not required",
-    "All features",
-    mse_rf50,
-    r2_rf50
+importances = rf_100.feature_importances_
+top_features = (
+    pd.Series(importances, index=X.columns)
+    .sort_values(ascending=False)
+    .head(5)
+    .index.tolist()
 )
 
-joblib.dump(rf_50, "outputs/model/random_forest_50.pkl")
+X_train_fs = X_train[top_features]
+X_test_fs = X_test[top_features]
+
+rf_100_fs = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_100_fs.fit(X_train_fs, y_train)
+
+y_pred_rf100 = rf_100_fs.predict(X_test_fs)
+mse_rf100 = mean_squared_error(y_test, y_pred_rf100)
+r2_rf100 = r2_score(y_test, y_pred_rf100)
+
+print_experiment(
+    "EXP-04",
+    "Random Forest (100 Trees + Feature Selection)",
+    "Random Forest Regressor",
+    "n_estimators=100",
+    "Not required",
+    ", ".join(top_features),
+    mse_rf100,
+    r2_rf100
+)
+
+joblib.dump(rf_100_fs, "outputs/model/random_forest_100_fs.pkl")
 
 results.append({
-    "Experiment": "EXP-03",
-    "Model": "Random Forest (50 Trees)",
-    "Hyperparameters": rf_50.get_params(),
-    "Preprocessing": "None",
-    "Feature_Selection": "All",
-    "MSE": mse_rf50,
-    "R2": r2_rf50
+    "Experiment": "EXP-04",
+    "Model": "Random Forest (100 Trees + Feature Selection)",
+    "Hyperparameters": rf_100_fs.get_params(),
+    "Selected_Features": top_features,
+    "MSE": mse_rf100,
+    "R2": r2_rf100
 })
 # --------------------------------------------------
 # Save metrics

@@ -1,20 +1,30 @@
 [
     {
-        "Experiment": "EXP-02",
-        "Model": "Ridge Regression",
+        "Experiment": "EXP-03",
+        "Model": "Random Forest (50 Trees)",
         "Hyperparameters": {
-            "alpha": 1.0,
-            "copy_X": true,
-            "fit_intercept": true,
-            "max_iter": null,
-            "positive": false,
-            "random_state": null,
-            "solver": "auto",
-            "tol": 0.0001
+            "bootstrap": true,
+            "ccp_alpha": 0.0,
+            "criterion": "squared_error",
+            "max_depth": null,
+            "max_features": 1.0,
+            "max_leaf_nodes": null,
+            "max_samples": null,
+            "min_impurity_decrease": 0.0,
+            "min_samples_leaf": 1,
+            "min_samples_split": 2,
+            "min_weight_fraction_leaf": 0.0,
+            "monotonic_cst": null,
+            "n_estimators": 50,
+            "n_jobs": null,
+            "oob_score": false,
+            "random_state": 42,
+            "verbose": 0,
+            "warm_start": false
         },
-        "Preprocessing": "StandardScaler",
+        "Preprocessing": "None",
         "Feature_Selection": "All",
-        "MSE": 0.3900380059146077,
-        "R2": 0.4031606598177524
+        "MSE": 0.30624250000000003,
+        "R2": 0.5313852269161226
     }
 ]
