@@ -1,0 +1,25 @@
+{
+    "Linear_Regression": {
+        "MSE": 0.39002514396395493,
+        "R2": 0.4031803412796219
+    },
+    "Ridge_Regression": {
+        "MSE": 0.3900380059146077,
+        "R2": 0.4031606598177524
+    },
+    "Random_Forest_50": {
+        "MSE": 0.30624250000000003,
+        "R2": 0.5313852269161226
+    },
+    "Random_Forest_100_Feature_Selected": {
+        "Selected_Features": [
+            "alcohol",
+            "sulphates",
+            "volatile acidity",
+            "total sulfur dioxide",
+            "chlorides"
+        ],
+        "MSE": 0.3295759375,
+        "R2": 0.4956802104036223
+    }
+}
