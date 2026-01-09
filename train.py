@@ -56,36 +56,36 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # --------------------------------------------------
-# EXP-02: Ridge Regression + Standardization
+# EXP-03: Random Forest (50 Trees)
 # --------------------------------------------------
-ridge = Ridge(alpha=1.0)
-ridge.fit(X_train_scaled, y_train)
+rf_50 = RandomForestRegressor(n_estimators=50, random_state=42)
+rf_50.fit(X_train, y_train)
 
-y_pred_ridge = ridge.predict(X_test_scaled)
-mse_ridge = mean_squared_error(y_test, y_pred_ridge)
-r2_ridge = r2_score(y_test, y_pred_ridge)
+y_pred_rf50 = rf_50.predict(X_test)
+mse_rf50 = mean_squared_error(y_test, y_pred_rf50)
+r2_rf50 = r2_score(y_test, y_pred_rf50)
 
 print_experiment(
-    "EXP-02",
-    "Ridge Regression + Standardization",
-    "Ridge Regression",
-    "alpha=1.0",
-    "Standardization (StandardScaler)",
+    "EXP-03",
+    "Random Forest (50 Trees)",
+    "Random Forest Regressor",
+    "n_estimators=50",
+    "Not required",
     "All features",
-    mse_ridge,
-    r2_ridge
+    mse_rf50,
+    r2_rf50
 )
 
-joblib.dump(ridge, "outputs/model/ridge_regression.pkl")
+joblib.dump(rf_50, "outputs/model/random_forest_50.pkl")
 
 results.append({
-    "Experiment": "EXP-02",
-    "Model": "Ridge Regression",
-    "Hyperparameters": ridge.get_params(),
-    "Preprocessing": "StandardScaler",
+    "Experiment": "EXP-03",
+    "Model": "Random Forest (50 Trees)",
+    "Hyperparameters": rf_50.get_params(),
+    "Preprocessing": "None",
     "Feature_Selection": "All",
-    "MSE": mse_ridge,
-    "R2": r2_ridge
+    "MSE": mse_rf50,
+    "R2": r2_rf50
 })
 # --------------------------------------------------
 # Save metrics
