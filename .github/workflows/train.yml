@@ -1,0 +1,51 @@
+name: ML Training Pipeline
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run training script
+        run: |
+          python train.py | tee output.txt
+
+      - name: Write Job Summary
+        run: |
+          echo "## Lab 2 – Model Training Summary" >> $GITHUB_STEP_SUMMARY
+          echo "**Name:** Rallapalli V S B Harshith" >> $GITHUB_STEP_SUMMARY
+          echo "**Roll Number:** 2022BCS0042" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Evaluation Metrics" >> $GITHUB_STEP_SUMMARY
+          cat output.txt >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Model Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: outputs/model/
+
+      - name: Upload Metrics Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-results
+          path: outputs/results/
+
