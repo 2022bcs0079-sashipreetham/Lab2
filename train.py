@@ -56,38 +56,37 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # --------------------------------------------------
-# EXP-01: Linear Regression + Standardization
+# EXP-02: Ridge Regression + Standardization
 # --------------------------------------------------
-lr = LinearRegression()
-lr.fit(X_train_scaled, y_train)
+ridge = Ridge(alpha=1.0)
+ridge.fit(X_train_scaled, y_train)
 
-y_pred_lr = lr.predict(X_test_scaled)
-mse_lr = mean_squared_error(y_test, y_pred_lr)
-r2_lr = r2_score(y_test, y_pred_lr)
+y_pred_ridge = ridge.predict(X_test_scaled)
+mse_ridge = mean_squared_error(y_test, y_pred_ridge)
+r2_ridge = r2_score(y_test, y_pred_ridge)
 
 print_experiment(
-    "EXP-01",
-    "Linear Regression + Standardization",
-    "Linear Regression",
-    "Default",
+    "EXP-02",
+    "Ridge Regression + Standardization",
+    "Ridge Regression",
+    "alpha=1.0",
     "Standardization (StandardScaler)",
     "All features",
-    mse_lr,
-    r2_lr
+    mse_ridge,
+    r2_ridge
 )
 
-joblib.dump(lr, "outputs/model/linear_regression.pkl")
+joblib.dump(ridge, "outputs/model/ridge_regression.pkl")
 
 results.append({
-    "Experiment": "EXP-01",
-    "Model": "Linear Regression",
-    "Hyperparameters": lr.get_params(),
+    "Experiment": "EXP-02",
+    "Model": "Ridge Regression",
+    "Hyperparameters": ridge.get_params(),
     "Preprocessing": "StandardScaler",
     "Feature_Selection": "All",
-    "MSE": mse_lr,
-    "R2": r2_lr
+    "MSE": mse_ridge,
+    "R2": r2_ridge
 })
-
 # --------------------------------------------------
 # Save metrics
 # --------------------------------------------------
