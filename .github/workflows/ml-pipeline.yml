@@ -12,7 +12,7 @@ env:
   MODEL_DIR: outputs/model
   METRICS_DIR: outputs/results
   METRICS_FILE: outputs/results/metrics.json
-  DOCKER_IMAGE: $sashi1174/wine-quality-api:latest
+  DOCKER_IMAGE: sashi1174/wine-quality-api:latest
 
 # ==========================
 # Job 1: TRAIN (CI)
@@ -134,7 +134,7 @@ jobs:
           curl -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
-            https://api.github.com/repos/2022bcs0079-sashipreetham/Lab2/actions/variables/BEST_MSE \
+            https://api.github.com/repos/${{ github.repository }}/actions/variables/BEST_MSE \
             -d "{\"name\":\"BEST_MSE\",\"value\":\"${{ needs.train.outputs.mse }}\"}"
 
       - name: Update BEST_R2
@@ -143,5 +143,5 @@ jobs:
           curl -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
-            https://api.github.com/repos/2022bcs0079-sashipreetham/Lab2/actions/variables/BEST_R2 \
+           https://api.github.com/repos/${{ github.repository }}/actions/variables/BEST_R2 \
             -d "{\"name\":\"BEST_R2\",\"value\":\"${{ needs.train.outputs.r2 }}\"}"
