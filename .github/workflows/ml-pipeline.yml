@@ -1,0 +1,147 @@
+name: ML Train & Deploy Pipeline
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+# --------------------------
+# Global environment
+# --------------------------
+env:
+  MODEL_DIR: outputs/model
+  METRICS_DIR: outputs/results
+  METRICS_FILE: outputs/results/metrics.json
+  DOCKER_IMAGE: $sashi1174/wine-quality-api:latest
+
+# ==========================
+# Job 1: TRAIN (CI)
+# ==========================
+jobs:
+  train:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run training script
+        run: |
+          python train.py
+          # Should create outputs/model/model.pkl and outputs/results/metrics.json
+
+      - name: Show metrics
+        run: cat ${{ env.METRICS_FILE }}
+
+      - name: Extract metrics
+        id: metrics
+        run: |
+          echo "MSE=$(jq -r '."Mean Squared Error"' ${{ env.METRICS_FILE }})" >> $GITHUB_OUTPUT
+          echo "R2=$(jq -r '."R2 Score"' ${{ env.METRICS_FILE }})" >> $GITHUB_OUTPUT
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts
+          path: |
+            outputs/model/
+            outputs/results/
+
+    outputs:
+      mse: ${{ steps.metrics.outputs.MSE }}
+      r2: ${{ steps.metrics.outputs.R2 }}
+
+# ==========================
+# Job 2: DEPLOY (CD)
+# ==========================
+  deploy:
+    needs: train
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: model-artifacts
+          path: outputs/
+
+      # -------------------------
+      # Compare metrics with BEST
+      # -------------------------
+      - name: Compare metrics
+        id: compare
+        run: |
+          CUR_MSE=${{ needs.train.outputs.mse }}
+          CUR_R2=${{ needs.train.outputs.r2 }}
+          BEST_MSE=${{ vars.BEST_MSE }}
+          BEST_R2=${{ vars.BEST_R2 }}
+
+          echo "Current MSE: $CUR_MSE | Best MSE: $BEST_MSE"
+          echo "Current R2: $CUR_R2 | Best R2: $BEST_R2"
+
+          improve_mse=$(echo "$CUR_MSE < $BEST_MSE" | bc -l)
+          improve_r2=$(echo "$CUR_R2 > $BEST_R2" | bc -l)
+
+          if [ "$improve_mse" -eq 1 ] && [ "$improve_r2" -eq 1 ]; then
+            echo "improved=true" >> $GITHUB_OUTPUT
+          else
+            echo "improved=false" >> $GITHUB_OUTPUT
+          fi
+
+      # -------------------------
+      # Stop if no improvement
+      # -------------------------
+      - name: Stop if no improvement
+        if: steps.compare.outputs.improved == 'false'
+        run: |
+          echo "Metrics did not improve, but will push Docker image anyway for testing"
+          # Comment out exit 0 to always push image
+
+      # -------------------------
+      # Docker login, build & push
+      # -------------------------
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.DOCKER_IMAGE }} .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.DOCKER_IMAGE }}
+
+      # -------------------------
+      # Update GitHub Variables if improved
+      # -------------------------
+      - name: Update BEST_MSE
+        if: steps.compare.outputs.improved == 'true'
+        run: |
+          curl -X PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
+            https://api.github.com/repos/2022bcs0079-sashipreetham/Lab2/actions/variables/BEST_MSE \
+            -d "{\"name\":\"BEST_MSE\",\"value\":\"${{ needs.train.outputs.mse }}\"}"
+
+      - name: Update BEST_R2
+        if: steps.compare.outputs.improved == 'true'
+        run: |
+          curl -X PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
+            https://api.github.com/repos/2022bcs0079-sashipreetham/Lab2/actions/variables/BEST_R2 \
+            -d "{\"name\":\"BEST_R2\",\"value\":\"${{ needs.train.outputs.r2 }}\"}"
