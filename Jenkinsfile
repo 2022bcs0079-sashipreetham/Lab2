@@ -7,7 +7,7 @@ pipeline {
             steps {
                 sh '''
                 echo "======================================"
-                echo "Name: SASHI PREETHAM"
+                echo "Name: G Sashi Preetham"
                 echo "Roll No: 2022BCS0079"
                 echo "======================================"
                 '''
@@ -37,12 +37,12 @@ pipeline {
             }
         }
 
-        stage('Completion Message') {
+        stage('Print Completion Message') {
             steps {
                 sh '''
                 echo "======================================"
                 echo "Model training completed successfully!"
-                echo "Name: SASHI PREETHAM"
+                echo "Name:G Sashi Preetham"
                 echo "Roll No: 2022BCS0079"
                 echo "======================================"
                 '''
