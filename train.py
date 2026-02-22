@@ -12,8 +12,8 @@ from sklearn.ensemble import RandomForestRegressor
 
 def main():
     # 1. Load dataset
-    red_path = "dataset/wine+quality/winequality-red.csv"
-    white_path = "dataset/wine+quality/winequality-white.csv"
+    red_path = "dataset/winequality-red.csv"
+    white_path = "dataset/winequality-white.csv"
 
     red = pd.read_csv(red_path, sep=";")
     white = pd.read_csv(white_path, sep=";")
