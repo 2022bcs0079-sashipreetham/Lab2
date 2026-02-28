@@ -27,6 +27,9 @@ pipeline {
         stage('Run Container') {
             steps {
                 sh '''
+                echo "Removing old container if exists..."
+                docker rm -f $CONTAINER_NAME || true
+                
                 echo "Starting container..."
                 docker run -d --name $CONTAINER_NAME \
                   -v ${WORKSPACE}/tests:/tests \
